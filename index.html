@@ -1,0 +1,1459 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090b18">
+<title>StockLab — Your Night. Your Market. Your Edge.</title>
+<style>
+:root {
+  --bg: #090b18;
+  --panel: rgba(20, 24, 46, .78);
+  --panel-strong: rgba(22, 27, 51, .94);
+  --line: rgba(180, 190, 255, .13);
+  --text: #f1f2ff;
+  --muted: #969dbb;
+  --blue: #65c7ff;
+  --purple: #9b83ff;
+  --orange: #ff9b69;
+  --green: #70ddb0;
+  --red: #ff7c92;
+  --radius: 18px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+button:disabled { opacity: .45; cursor: not-allowed; }
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.eyebrow {
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h2 { font-size: 22px; letter-spacing: -.035em; }
+h3 { font-size: 15px; }
+button, .btn {
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 10px 14px;
+  color: var(--text);
+  background: rgba(255,255,255,.045);
+  transition: .2s ease;
+}
+button:hover, .btn:hover {
+  border-color: rgba(101,199,255,.5);
+  background: rgba(101,199,255,.09);
+}
+.primary {
+  color: #07111d;
+  font-weight: 800;
+  border: 0;
+  background: linear-gradient(115deg, #79d9ff, #a69aff);
+  box-shadow: 0 6px 28px rgba(101,199,255,.16);
+}
+.primary:hover {
+  background: linear-gradient(115deg, #a4e5ff, #c0b5ff);
+  transform: translateY(-1px);
+}
+.danger { color: var(--red); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { color: var(--muted); font-size: 12px; }
+input, select, textarea {
+  width: 100%;
+  color: var(--text);
+  background: rgba(6,9,23,.76);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px 12px;
+}
+select option { background: #151a31; }
+textarea { min-height: 100px; resize: vertical; }
+::placeholder { color: #68708d; }
+.glass {
+  background: linear-gradient(135deg, rgba(28,34,64,.82), rgba(13,17,36,.82));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 18px 60px rgba(0,0,0,.13);
+  backdrop-filter: blur(18px);
+}
+.panel { padding: 22px; }
+.row { display: flex; align-items: center; gap: 12px; }
+.between { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.wrap { flex-wrap: wrap; }
+.gap { gap: 10px; }
+.grid { display: grid; gap: 16px; }
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.tag.blue { color: var(--blue); border-color: rgba(101,199,255,.25); }
+.tag.orange { color: var(--orange); border-color: rgba(255,155,105,.25); }
+.divider { height: 1px; background: var(--line); margin: 18px 0; }
+#bar-home {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px clamp(22px, 7vw, 100px) 24px;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(91,74,151,.2), transparent 48%),
+    linear-gradient(180deg, rgba(6,8,19,.22), rgba(6,8,19,.86)),
+    linear-gradient(115deg, #10152d 0%, #201a3a 43%, #0b1428 100%);
+  transition: opacity .85s ease, filter .85s ease, transform .85s ease;
+}
+#bar-home.leaving { opacity: 0; filter: blur(16px); transform: scale(1.035); pointer-events: none; }
+.bar-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bar-scene::before {
+  content: "";
+  position: absolute;
+  left: 4%; right: 4%; top: 7%; height: 43%;
+  background:
+    linear-gradient(90deg, transparent, rgba(103,119,211,.08), transparent),
+    repeating-linear-gradient(90deg, transparent 0 13%, rgba(177,161,255,.035) 13.1% 13.3%);
+  border-bottom: 1px solid rgba(182,180,255,.13);
+  filter: blur(1px);
+}
+.bar-scene::after {
+  content: "";
+  position: absolute;
+  left: -10%; right: -10%; bottom: -20%;
+  height: 53%;
+  background: linear-gradient(180deg, rgba(255,151,99,.05), rgba(7,9,19,.97) 76%);
+  transform: perspective(450px) rotateX(8deg);
+  border-top: 1px solid rgba(255,171,120,.13);
+}
+.light {
+  position: absolute;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .23;
+  animation: drift 13s ease-in-out infinite alternate;
+}
+.light.one { background: #5559ff; left: 12%; top: 12%; }
+.light.two { background: #ff8c61; right: 9%; top: 19%; animation-delay: -5s; }
+.light.three { background: #3b9dff; left: 44%; bottom: 5%; animation-delay: -8s; }
+@keyframes drift { to { transform: translate(38px, 24px) scale(1.16); } }
+.bar-top, .bar-bottom, .hero-content { position: relative; z-index: 1; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  display: grid; place-items: center;
+  width: 38px; height: 38px;
+  border: 1px solid rgba(120,202,255,.42);
+  border-radius: 12px;
+  color: var(--blue);
+  font-size: 17px;
+  background: rgba(101,199,255,.08);
+  box-shadow: 0 0 28px rgba(101,199,255,.08);
+}
+.brand-name { font-weight: 850; letter-spacing: .14em; font-size: 13px; }
+.brand-sub { color: var(--muted); font-size: 10px; letter-spacing: .08em; }
+.hero-content {
+  width: min(100%, 900px);
+  margin: auto 0;
+  padding: 70px 0;
+}
+.hero-kicker {
+  display: flex; align-items: center; gap: 10px;
+  color: #b9c4ed; font-size: 11px; letter-spacing: .2em;
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--orange); box-shadow: 0 0 15px var(--orange);
+}
+.hero-title {
+  margin: 24px 0 20px;
+  font-size: clamp(48px, 9.2vw, 112px);
+  font-weight: 850;
+  line-height: .98;
+  letter-spacing: -.075em;
+  background: linear-gradient(115deg, #fff 8%, #c4c7ff 45%, #81d5ff 76%, #ffb28b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 8px 38px rgba(102,117,255,.14));
+}
+.hero-title span { display: block; font-size: .32em; letter-spacing: .24em; margin-top: 22px; }
+.hero-copy { max-width: 480px; color: #b5bbd6; font-size: 14px; }
+.hero-actions { display: flex; align-items: center; gap: 16px; margin-top: 32px; flex-wrap: wrap; }
+.enter-btn { padding: 14px 22px; min-width: 170px; }
+.hero-footnote { color: #828aa9; font-size: 11px; }
+.bar-bottom { display: flex; justify-content: space-between; gap: 15px; color: #79819e; font-size: 10px; letter-spacing: .1em; }
+#app { min-height: 100vh; opacity: 0; transition: opacity .8s ease; }
+#app.ready { opacity: 1; }
+.app-layout { display: grid; grid-template-columns: 224px minmax(0,1fr); min-height: 100vh; }
+.sidebar {
+  position: sticky; top: 0; height: 100vh;
+  display: flex; flex-direction: column;
+  padding: 24px 15px;
+  background: rgba(9,12,27,.91);
+  border-right: 1px solid var(--line);
+}
+.side-label { margin: 30px 10px 9px; color: #656e8c; font-size: 10px; letter-spacing: .16em; }
+.nav-btn {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%; padding: 11px 12px; margin: 2px 0;
+  text-align: left; color: #a9b0cc; border-color: transparent; background: transparent;
+}
+.nav-btn.active {
+  color: #e8edff;
+  border-color: rgba(126,153,255,.15);
+  background: linear-gradient(90deg, rgba(111,127,255,.16), rgba(101,199,255,.035));
+}
+.nav-icon { width: 20px; text-align: center; color: var(--blue); }
+.side-bottom { margin-top: auto; }
+.workspace { min-width: 0; padding: 28px clamp(16px,3vw,42px) 60px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 28px; }
+.page-title { font-size: 25px; font-weight: 800; letter-spacing: -.04em; margin: 3px 0; }
+.status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 6px; }
+.stats-grid { grid-template-columns: repeat(4, minmax(0,1fr)); margin-bottom: 20px; }
+.stat-label { color: var(--muted); font-size: 12px; }
+.stat-value { font-size: clamp(21px,2.4vw,30px); font-weight: 800; letter-spacing: -.05em; margin: 9px 0 2px; }
+.stat-note { color: #7f88a6; font-size: 11px; }
+.section-head { margin-bottom: 16px; }
+.section-head h2 { margin-bottom: 2px; }
+.toolbar { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.toolbar input { min-width: 180px; flex: 1; }
+.toolbar select { width: auto; min-width: 130px; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 650px; }
+th, td { text-align: left; padding: 14px 12px; border-bottom: 1px solid var(--line); }
+th { color: #818aa9; font-size: 11px; font-weight: 600; }
+td { font-size: 13px; }
+tbody tr { transition: background .15s; }
+tbody tr:hover { background: rgba(101,199,255,.035); }
+.stock-name { font-weight: 750; }
+.stock-code { color: var(--muted); font-size: 11px; }
+.text-right { text-align: right; }
+.metric { font-variant-numeric: tabular-nums; }
+.positive { color: var(--green); }
+.negative { color: var(--red); }
+.stock-open { color: var(--blue); background: none; border: 0; padding: 0; text-align: left; }
+.stock-open:hover { background: none; color: #b5e9ff; }
+.empty-state { padding: 40px 15px; text-align: center; color: var(--muted); }
+.page { display: none; }
+.page.active { display: block; animation: page-in .35s ease; }
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.detail-grid { grid-template-columns: minmax(0,1.15fr) minmax(280px,.85fr); align-items: start; }
+.form-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.three-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.data-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.form-actions { display: flex; justify-content: flex-end; gap: 9px; flex-wrap: wrap; margin-top: 18px; }
+.scenario { padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(5,9,23,.28); }
+.scenario h3 { margin-bottom: 14px; }
+.scenario .field { margin-bottom: 12px; }
+.scenario-value { font-size: 23px; font-weight: 800; margin: 8px 0; }
+.journal-entry { padding: 15px 0; border-bottom: 1px solid var(--line); }
+.journal-entry:last-child { border-bottom: 0; }
+.journal-date { color: var(--blue); font-size: 11px; }
+.notice {
+  padding: 12px 14px; border: 1px solid rgba(255,155,105,.2);
+  border-radius: 12px; color: #d5b6a5; background: rgba(255,155,105,.055);
+  font-size: 12px;
+}
+.toast {
+  position: fixed; z-index: 99; right: 22px; bottom: 22px;
+  max-width: calc(100vw - 44px); padding: 13px 18px;
+  border: 1px solid rgba(112,221,176,.3); border-radius: 12px;
+  background: #172a2a; color: #c9ffe7; box-shadow: 0 12px 40px #0005;
+  opacity: 0; transform: translateY(12px); pointer-events: none; transition: .25s;
+}
+.toast.show { opacity: 1; transform: none; }
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
+  padding: 20px; background: rgba(3,5,14,.75); backdrop-filter: blur(10px);
+}
+.modal { width: min(100%,600px); max-height: 88vh; overflow: auto; padding: 24px; }
+@media (max-width: 1050px) {
+  .app-layout { grid-template-columns: 190px minmax(0,1fr); }
+  .stats-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .detail-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  #bar-home { padding: 22px 22px 18px; }
+  .hero-content { padding: 55px 0; }
+  .hero-title { font-size: clamp(48px,15vw,82px); }
+  .bar-bottom { flex-direction: column; gap: 4px; }
+  .app-layout { display: block; }
+  .sidebar {
+    position: sticky; z-index: 10; top: 0; height: auto;
+    padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(20px);
+  }
+  .sidebar .brand { padding: 0 4px 8px; }
+  .sidebar .brand-mark { width: 30px; height: 30px; }
+  .side-label, .side-bottom { display: none; }
+  .nav-list { display: flex; overflow-x: auto; gap: 4px; }
+  .nav-btn { width: auto; white-space: nowrap; padding: 8px 10px; font-size: 12px; }
+  .workspace { padding: 20px 14px 40px; }
+  .topbar { align-items: flex-start; }
+  .topbar .toolbar { justify-content: flex-end; }
+  .panel { padding: 16px; }
+  .form-grid, .three-grid, .data-grid { grid-template-columns: 1fr; }
+  .stats-grid { gap: 10px; }
+  .stat-value { font-size: 24px; }
+  .toolbar { width: 100%; }
+  .toolbar input { min-width: 100%; }
+  .toolbar select { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<div id="bar-home">
+  <div class="bar-scene" aria-hidden="true">
+    <div class="light one"></div>
+    <div class="light two"></div>
+    <div class="light three"></div>
+  </div>
+  <header class="bar-top between">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div>
+        <div class="brand-name">STOCKLAB</div>
+        <div class="brand-sub">PERSONAL EQUITY RESEARCH</div>
+      </div>
+    </div>
+    <span class="tag">✦ YOUR PRIVATE RESEARCH SPACE</span>
+  </header>
+
+  <main class="hero-content">
+    <div class="hero-kicker"><span class="live-dot"></span> AFTER HOURS · BETTER DECISIONS</div>
+    <h1 class="hero-title">Your Night.<br>Your Market.<span>Your Edge.</span></h1>
+    <p class="hero-copy">
+      市場不會因為夜深而停止思考。留一點安靜的時間，研究企業、拆解估值，建立真正屬於自己的投資觀點。
+    </p>
+    <div class="hero-actions">
+      <button class="primary enter-btn" id="enter-lab">進入研究室 <span aria-hidden="true">↗</span></button>
+      <span class="hero-footnote">A quieter space for sharper thinking.</span>
+    </div>
+    <div class="row wrap" style="margin-top:34px;gap:8px">
+      <span class="tag">01 / RESEARCH</span>
+      <span class="tag">02 / VALUATION</span>
+      <span class="tag">03 / CONVICTION</span>
+    </div>
+  </main>
+  <footer class="bar-bottom">
+    <span>STOCKLAB © PERSONAL RESEARCH WORKSPACE</span>
+    <span>THINK DEEPLY. INVEST CLEARLY.</span>
+  </footer>
+</div>
+
+<div id="app">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div>
+          <div class="brand-name">STOCKLAB</div>
+          <div class="brand-sub">RESEARCH TERMINAL</div>
+        </div>
+      </div>
+
+      <div class="side-label">WORKSPACE</div>
+      <nav class="nav-list" aria-label="主要導覽">
+        <button class="nav-btn active" data-page="dashboard"><span class="nav-icon">◈</span>研究總覽</button>
+        <button class="nav-btn" data-page="stocks"><span class="nav-icon">▤</span>我的股票</button>
+        <button class="nav-btn" data-page="journal"><span class="nav-icon">✎</span>研究日誌</button>
+      </nav>
+
+      <div class="side-label">PREFERENCES</div>
+      <nav class="nav-list" aria-label="設定導覽">
+        <button class="nav-btn" data-page="settings"><span class="nav-icon">⚙</span>資料與設定</button>
+      </nav>
+
+      <div class="side-bottom">
+        <div class="glass panel">
+          <div class="eyebrow">A NOTE TO SELF</div>
+          <p style="margin:10px 0 0;font-size:12px;color:#c1c8e2">
+            好的投資，不是預測每一次波動，而是理解自己承擔風險的理由。
+          </p>
+        </div>
+        <p class="muted small" style="padding:0 8px;margin-top:15px">LOCAL WORKSPACE · V1.0</p>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow" id="breadcrumb">YOUR WORKSPACE / OVERVIEW</div>
+          <h1 class="page-title" id="page-heading">研究總覽</h1>
+          <div class="muted small" id="page-subtitle">把市場觀察，累積成自己的研究框架。</div>
+        </div>
+        <div class="toolbar" style="width:auto">
+          <button id="quick-export">匯出備份 ↗</button>
+          <button class="primary" id="add-stock-top">＋ 新增股票</button>
+        </div>
+      </header>
+
+      <section class="page active" id="page-dashboard">
+        <div class="grid stats-grid">
+          <div class="glass panel">
+            <div class="stat-label">研究企業</div>
+            <div class="stat-value metric" id="stat-count">0</div>
+            <div class="stat-note">已建立的研究標的</div>
+          </div>
+          <div class="glass panel">
+            <div class="stat-label">研究日誌</div>
+            <div class="stat-value metric" id="stat-journals">0</div>
+            <div class="stat-note">累積研究紀錄</div>
+          </div>
+          <div class="glass panel">
+            <div class="stat-label">已完成估值</div>
+            <div class="stat-value metric" id="stat-valued">0</div>
+            <div class="stat-note">具有完整估值輸入的企業</div>
+          </div>
+          <div class="glass panel">
+            <div class="stat-label">資料儲存</div>
+            <div class="stat-value" style="font-size:19px">LOCAL</div>
+            <div class="stat-note"><span class="status-dot"></span>儲存於目前瀏覽器</div>
+          </div>
+        </div>
+
+        <div class="glass panel" style="margin-bottom:20px">
+          <div class="between section-head">
+            <div>
+              <div class="eyebrow">YOUR WATCHLIST</div>
+              <h2 style="margin:4px 0">研究追蹤清單</h2>
+              <div class="muted small">集中管理企業資料、財務指標與估值假設。</div>
+            </div>
+            <button class="primary" id="add-stock-main">＋ 新增標的</button>
+          </div>
+          <div class="toolbar" style="margin-bottom:17px">
+            <input id="stock-search" type="search" placeholder="搜尋公司名稱或股票代號…" aria-label="搜尋股票">
+            <select id="industry-filter" aria-label="依產業篩選">
+              <option value="">所有產業</option>
+            </select>
+            <select id="valuation-filter" aria-label="依估值狀態篩選">
+              <option value="">所有估值狀態</option>
+              <option value="valued">已建立估值</option>
+              <option value="unvalued">尚未建立估值</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>企業 / 代號</th>
+                  <th>產業</th>
+                  <th class="text-right">股價</th>
+                  <th class="text-right">本益比</th>
+                  <th>估值狀態</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="stock-table-body"></tbody>
+            </table>
+          </div>
+          <div id="stock-empty" class="empty-state hidden">
+            <div style="font-size:28px;margin-bottom:8px">⌕</div>
+            <div>目前沒有符合條件的標的</div>
+            <div class="small muted">試著調整搜尋條件，或新增一家企業。</div>
+          </div>
+        </div>
+
+        <div class="grid detail-grid">
+          <div class="glass panel">
+            <div class="eyebrow">RESEARCH PROCESS</div>
+            <h2 style="margin:5px 0">從資訊到判斷</h2>
+            <div class="divider"></div>
+            <div class="row" style="align-items:flex-start;margin-bottom:16px">
+              <span class="tag blue">01</span>
+              <div><strong>理解企業</strong><div class="muted small">商業模式、競爭優勢與產業位置。</div></div>
+            </div>
+            <div class="row" style="align-items:flex-start;margin-bottom:16px">
+              <span class="tag blue">02</span>
+              <div><strong>拆解財務</strong><div class="muted small">EPS、營收成長、獲利能力與股利。</div></div>
+            </div>
+            <div class="row" style="align-items:flex-start">
+              <span class="tag blue">03</span>
+              <div><strong>建立估值</strong><div class="muted small">以不同情境檢驗假設與風險。</div></div>
+            </div>
+          </div>
+          <div class="glass panel">
+            <div class="eyebrow">RECENT ACTIVITY</div>
+            <h2 style="margin:5px 0">最近研究</h2>
+            <div id="recent-activity" class="muted small">新增研究日誌後，最近的紀錄會顯示在這裡。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-stocks">
+        <div class="glass panel">
+          <div class="between section-head">
+            <div>
+              <div class="eyebrow">EQUITY UNIVERSE</div>
+              <h2 style="margin:4px 0">我的股票</h2>
+              <div class="muted small">你追蹤的每一家企業，都有自己的研究檔案。</div>
+            </div>
+            <button class="primary" id="add-stock-list">＋ 新增股票</button>
+          </div>
+          <div class="toolbar" style="margin-bottom:16px">
+            <input id="stock-search-all" type="search" placeholder="搜尋名稱或代號…">
+            <select id="industry-filter-all"><option value="">所有產業</option></select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>企業 / 代號</th><th>產業</th><th>估值狀態</th><th>最後更新</th><th>操作</th></tr>
+              </thead>
+              <tbody id="stock-table-all"></tbody>
+            </table>
+          </div>
+          <div id="stock-empty-all" class="empty-state hidden">還沒有研究標的，新增一家企業開始吧。</div>
+        </div>
+      </section>
+
+      <section class="page" id="page-detail">
+        <div class="between wrap" style="margin-bottom:18px">
+          <button id="back-to-stocks">← 返回股票清單</button>
+          <div class="toolbar" style="width:auto">
+            <button id="edit-current-stock">編輯企業資料</button>
+            <button class="primary" id="save-current-stock">儲存研究</button>
+          </div>
+        </div>
+        <div class="glass panel" style="margin-bottom:18px">
+          <div class="between wrap">
+            <div>
+              <div class="eyebrow" id="detail-code-label">EQUITY RESEARCH</div>
+              <h2 id="detail-name" style="font-size:30px;margin:5px 0">企業名稱</h2>
+              <div class="muted" id="detail-description">建立企業資料與你的研究觀點。</div>
+            </div>
+            <div class="toolbar" style="width:auto">
+              <span class="tag blue" id="detail-industry">未分類</span>
+              <span class="tag" id="detail-updated">尚未更新</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid detail-grid">
+          <div class="grid">
+            <section class="glass panel">
+              <div class="eyebrow">01 / COMPANY PROFILE</div>
+              <h2>企業資訊</h2>
+              <div class="grid form-grid">
+                <div class="field"><label for="d-company">公司名稱</label><input id="d-company" placeholder="企業名稱"></div>
+                <div class="field"><label for="d-code">股票代號</label><input id="d-code" placeholder="例如：2330"></div>
+                <div class="field"><label for="d-industry">產業分類</label><select id="d-industry"></select></div>
+                <div class="field"><label for="d-date">研究基準日</label><input id="d-date" type="date"></div>
+              </div>
+              <div class="field" style="margin-top:14px"><label for="d-business">商業模式與競爭優勢</label><textarea id="d-business" placeholder="企業如何賺錢？核心產品、客戶、競爭優勢與產業地位…"></textarea></div>
+            </section>
+
+            <section class="glass panel">
+              <div class="eyebrow">02 / FINANCIAL SNAPSHOT</div>
+              <h2>財務數據</h2>
+              <div class="notice" style="margin-bottom:16px">所有數據均由你手動輸入。每項財務指標請記錄所屬期間或資料日期，避免混用不同年度的數據。</div>
+              <div class="grid form-grid">
+                <div class="field"><label for="d-price">目前股價（元）</label><input id="d-price" type="number" min="0" step="any" placeholder="手動輸入"></div>
+                <div class="field"><label for="d-price-date">股價資料日期</label><input id="d-price-date" type="date"></div>
+                <div class="field"><label for="d-eps">每股盈餘 EPS（元）</label><input id="d-eps" type="number" step="any" placeholder="例如：12.5"></div>
+                <div class="field"><label for="d-eps-period">EPS 所屬期間</label><input id="d-eps-period" placeholder="例如：2025 全年 / 2026 Q2"></div>
+                <div class="field"><label for="d-pe">目前本益比 P/E（倍）</label><input id="d-pe" type="number" min="0" step="any" placeholder="手動輸入或自行計算"></div>
+                <div class="field"><label for="d-pe-date">本益比資料日期</label><input id="d-pe-date" type="date"></div>
+                <div class="field"><label for="d-revenue">營收（元）</label><input id="d-revenue" type="number" min="0" step="any" placeholder="請填寫實際單位"></div>
+                <div class="field"><label for="d-revenue-period">營收所屬期間</label><input id="d-revenue-period" placeholder="例如：2026 年 8 月"></div>
+                <div class="field"><label for="d-growth">營收年增率 YoY（%）</label><input id="d-growth" type="number" step="any" placeholder="例如：15.2"></div>
+                <div class="field"><label for="d-growth-period">年增率比較期間</label><input id="d-growth-period" placeholder="例如：2026 年 8 月 vs 2025 年 8 月"></div>
+                <div class="field"><label for="d-dividend">每股現金股利（元）</label><input id="d-dividend" type="number" min="0" step="any" placeholder="手動輸入"></div>
+                <div class="field"><label for="d-dividend-period">股利所屬年度</label><input id="d-dividend-period" placeholder="例如：2025 年度"></div>
+                <div class="field"><label for="d-yield">現金股利殖利率（%）</label><input id="d-yield" type="number" min="0" step="any" placeholder="手動輸入"></div>
+                <div class="field"><label for="d-yield-date">殖利率資料日期</label><input id="d-yield-date" type="date"></div>
+              </div>
+            </section>
+
+            <section class="glass panel">
+              <div class="eyebrow">03 / INVESTMENT THESIS</div>
+              <h2>投資論點與風險</h2>
+              <div class="field" style="margin-bottom:14px"><label for="d-thesis">核心投資論點</label><textarea id="d-thesis" placeholder="為什麼值得研究？未來成長的驅動因素是什麼？"></textarea></div>
+              <div class="field" style="margin-bottom:14px"><label for="d-risks">主要風險與反方觀點</label><textarea id="d-risks" placeholder="什麼情況會讓你的投資論點失效？競爭、景氣、估值或財務風險…"></textarea></div>
+              <div class="field"><label for="d-notes">其他研究筆記</label><textarea id="d-notes" placeholder="尚待確認的問題、待追蹤指標、參考資料…"></textarea></div>
+            </section>
+          </div>
+
+          <div class="grid">
+            <section class="glass panel">
+              <div class="eyebrow">04 / VALUATION MODEL</div>
+              <h2>三情境估值</h2>
+              <p class="muted small">合理價 = 預估 EPS × 假設合理本益比。所有情境都是你的假設，不是預測保證。</p>
+              <div class="grid three-grid">
+                <div class="scenario">
+                  <h3 style="color:var(--blue)">保守情境</h3>
+                  <div class="field"><label for="v-eps-low">預估 EPS</label><input id="v-eps-low" type="number" step="any" placeholder="元"></div>
+                  <div class="field"><label for="v-pe-low">合理本益比</label><input id="v-pe-low" type="number" min="0" step="any" placeholder="倍"></div>
+                  <div class="muted small">推估合理價</div><div class="scenario-value metric" id="v-price-low">—</div>
+                  <div class="muted small">相對現價報酬</div><div id="v-return-low" class="metric">—</div>
+                </div>
+                <div class="scenario">
+                  <h3 style="color:var(--green)">基準情境</h3>
+                  <div class="field"><label for="v-eps-base">預估 EPS</label><input id="v-eps-base" type="number" step="any" placeholder="元"></div>
+                  <div class="field"><label for="v-pe-base">合理本益比</label><input id="v-pe-base" type="number" min="0" step="any" placeholder="倍"></div>
+                  <div class="muted small">推估合理價</div><div class="scenario-value metric" id="v-price-base">—</div>
+                  <div class="muted small">相對現價報酬</div><div id="v-return-base" class="metric">—</div>
+                </div>
+                <div class="scenario">
+                  <h3 style="color:var(--orange)">樂觀情境</h3>
+                  <div class="field"><label for="v-eps-high">預估 EPS</label><input id="v-eps-high" type="number" step="any" placeholder="元"></div>
+                  <div class="field"><label for="v-pe-high">合理本益比</label><input id="v-pe-high" type="number" min="0" step="any" placeholder="倍"></div>
+                  <div class="muted small">推估合理價</div><div class="scenario-value metric" id="v-price-high">—</div>
+                  <div class="muted small">相對現價報酬</div><div id="v-return-high" class="metric">—</div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="grid form-grid">
+                <div><div class="muted small">基準情境合理價差</div><div class="scenario-value metric" id="v-gap-base">—</div></div>
+                <div><div class="muted small">現價相對合理價溢折價</div><div class="scenario-value metric" id="v-premium-base">—</div></div>
+              </div>
+              <div class="field" style="margin-top:12px"><label for="d-valuation-notes">估值假設與依據</label><textarea id="d-valuation-notes" placeholder="預估 EPS 的依據、合理本益比如何選定、情境成立的條件…"></textarea></div>
+            </section>
+
+            <section class="glass panel">
+              <div class="eyebrow">05 / RESEARCH JOURNAL</div>
+              <div class="between">
+                <h2 style="margin-bottom:0">個股研究日誌</h2>
+                <button id="add-journal-entry">＋ 新增紀錄</button>
+              </div>
+              <p class="muted small" style="margin-top:7px">保留每一次判斷的時間與理由，日後才能檢驗自己的投資框架。</p>
+              <div id="detail-journal-list"></div>
+              <div id="detail-journal-empty" class="empty-state">尚無研究紀錄。</div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-journal">
+        <div class="glass panel">
+          <div class="eyebrow">THOUGHTS OVER TIME</div>
+          <h2>研究日誌</h2>
+          <p class="muted small">集中回顧所有企業的研究更新與判斷依據。</p>
+          <div id="journal-page-list"></div>
+          <div id="journal-page-empty" class="empty-state">尚未建立研究日誌。</div>
+        </div>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="grid detail-grid">
+          <div class="glass panel">
+            <div class="eyebrow">DATA MANAGEMENT</div>
+            <h2>資料管理</h2>
+            <p class="muted">資料保存在這個瀏覽器的本機儲存空間。清除瀏覽器資料可能導致資料遺失，請定期匯出 JSON 備份。</p>
+            <div class="toolbar">
+              <button class="primary" id="export-json">匯出 JSON 備份</button>
+              <button id="import-json">匯入 JSON 備份</button>
+              <input class="hidden" id="import-file" type="file" accept=".json,application/json">
+            </div>
+            <div class="divider"></div>
+            <div class="muted small" id="data-summary">資料統計載入中…</div>
+          </div>
+          <div class="glass panel">
+            <div class="eyebrow">INDUSTRY TAXONOMY</div>
+            <h2>產業分類管理</h2>
+            <p class="muted small">可新增、重新命名或刪除自訂分類。刪除分類不會刪除股票。</p>
+            <div class="row">
+              <input id="new-industry" placeholder="新增產業名稱" aria-label="新增產業名稱">
+              <button class="primary" id="add-industry">新增</button>
+            </div>
+            <div id="industry-manager" style="margin-top:14px"></div>
+          </div>
+        </div>
+        <div class="glass panel" style="margin-top:18px">
+          <div class="eyebrow">ABOUT THIS WORKSPACE</div>
+          <h2>使用須知</h2>
+          <ul class="muted">
+            <li>本工具是個人研究工作台，不提供即時股價或投資建議。</li>
+            <li>範例標的僅作為介面示範，所有示範財務數字都必須清楚標示為虛構資料。</li>
+            <li>本機檔案與 GitHub Pages 網站的儲存空間不同；搬移網站時，請使用 JSON 匯出與匯入。</li>
+            <li>估值模型只呈現輸入假設的計算結果，不代表未來實際股價。</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+
+</div>
+<div id="app"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+  const STORAGE_KEY = "stocklab-data-v1";
+  const DEFAULT_INDUSTRIES = [
+    "半導體", "電子零組件", "電腦及週邊", "金融", "航運",
+    "生技醫療", "食品", "其他"
+  ];
+
+  const today = () => new Date().toISOString().slice(0, 10);
+  const uid = () => "s" + Date.now().toString(36) +
+    Math.random().toString(36).slice(2, 8);
+
+  const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[ch]);
+
+  const numberOrNull = value => {
+    if (value === "" || value === null || value === undefined) return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const fmt = (value, digits = 2) => {
+    const n = numberOrNull(value);
+    return n === null ? "—" : n.toLocaleString("zh-TW", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: digits
+    });
+  };
+
+  const pct = value => {
+    const n = numberOrNull(value);
+    return n === null ? "—" : (n > 0 ? "+" : "") + fmt(n * 100) + "%";
+  };
+
+  const money = value => {
+    const n = numberOrNull(value);
+    return n === null ? "—" : "NT$ " + fmt(n);
+  };
+
+  function blankStock() {
+    return {
+      id: uid(), company: "", code: "", industry: "其他",
+      description: "", business: "", price: null, priceDate: "",
+      eps: null, epsPeriod: "", pe: null, peDate: "",
+      revenue: null, revenuePeriod: "", growth: null, growthPeriod: "",
+      dividend: null, dividendPeriod: "", yield: null, yieldDate: "",
+      thesis: "", risks: "", notes: "", valuationNotes: "",
+      valuation: {
+        low: { eps: null, pe: null },
+        base: { eps: null, pe: null },
+        high: { eps: null, pe: null }
+      },
+      journals: [], createdAt: today(), updatedAt: today()
+    };
+  }
+
+  function demoStock(company, code, industry, description) {
+    const s = blankStock();
+    Object.assign(s, { company, code, industry, description, isDemo: true });
+    return s;
+  }
+
+  function defaultData() {
+    return {
+      version: 1,
+      industries: [...DEFAULT_INDUSTRIES],
+      stocks: [
+        demoStock("台積電", "2330", "半導體", "晶圓代工｜示範標的"),
+        demoStock("微星", "2377", "電腦及週邊", "電競與電腦硬體｜示範標的"),
+        demoStock("光寶科", "2301", "電子零組件", "電源與電子零組件｜示範標的")
+      ]
+    };
+  }
+
+  let data;
+  let currentStockId = null;
+  let editingStockId = null;
+  let toastTimer = null;
+
+  function loadData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaultData();
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.stocks) ||
+          !Array.isArray(parsed.industries)) {
+        throw new Error("格式不正確");
+      }
+      parsed.stocks = parsed.stocks.map(s => ({
+        ...blankStock(), ...s,
+        valuation: {
+          low: { eps: null, pe: null, ...(s.valuation?.low || {}) },
+          base: { eps: null, pe: null, ...(s.valuation?.base || {}) },
+          high: { eps: null, pe: null, ...(s.valuation?.high || {}) }
+        },
+        journals: Array.isArray(s.journals) ? s.journals : []
+      }));
+      parsed.industries = [...new Set([...DEFAULT_INDUSTRIES, ...parsed.industries])];
+      return parsed;
+    } catch (error) {
+      console.error("StockLab 載入資料失敗：", error);
+      return defaultData();
+    }
+  }
+
+  data = loadData();
+
+  function persist(message = "資料已儲存") {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      showToast(message);
+      renderAll();
+      return true;
+    } catch (error) {
+      console.error(error);
+      showToast("儲存失敗，可能是瀏覽器儲存空間不足");
+      return false;
+    }
+  }
+
+  function showToast(message) {
+    const el = $("toast");
+    el.textContent = message;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+  }
+
+  function findStock(id) {
+    return data.stocks.find(s => s.id === id);
+  }
+
+  function hasValuation(s) {
+    return ["low", "base", "high"].some(key => {
+      const v = s.valuation?.[key];
+      return numberOrNull(v?.eps) !== null && numberOrNull(v?.pe) !== null;
+    });
+  }
+
+  function fairValue(s, key) {
+    const v = s.valuation?.[key];
+    const eps = numberOrNull(v?.eps);
+    const pe = numberOrNull(v?.pe);
+    if (eps === null || pe === null) return null;
+    return eps * pe;
+  }
+
+  function expectedReturn(s, key) {
+    const fair = fairValue(s, key);
+    const price = numberOrNull(s.price);
+    if (fair === null || price === null || price <= 0) return null;
+    return fair / price - 1;
+  }
+
+  function setPage(page) {
+    const validPages = ["dashboard", "stocks", "detail", "journal", "settings"];
+    if (!validPages.includes(page)) page = "dashboard";
+
+    document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
+    const target = $("page-" + page);
+    if (target) target.classList.add("active");
+
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.page === page);
+    });
+
+    const labels = {
+      dashboard: ["YOUR WORKSPACE / OVERVIEW", "研究總覽", "把市場觀察，累積成自己的研究框架。"],
+      stocks: ["YOUR WORKSPACE / EQUITIES", "我的股票", "整理你的研究標的與觀察清單。"],
+      detail: ["EQUITY / RESEARCH FILE", "個股研究", "把財務資料、估值假設與投資論點放在一起。"],
+      journal: ["YOUR WORKSPACE / JOURNAL", "研究日誌", "回顧你的觀點如何隨時間改變。"],
+      settings: ["YOUR WORKSPACE / SETTINGS", "資料與設定", "管理資料備份與自訂產業分類。"]
+    };
+    const [crumb, heading, subtitle] = labels[page];
+    $("breadcrumb").textContent = crumb;
+    $("page-heading").textContent = heading;
+    $("page-subtitle").textContent = subtitle;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function openResearch(id) {
+    const s = findStock(id);
+    if (!s) return;
+    currentStockId = id;
+    fillDetail(s);
+    setPage("detail");
+  }
+
+  function fillSelect(select, selected = "") {
+    if (!select) return;
+    select.innerHTML = data.industries.map(i =>
+      `<option value="${esc(i)}">${esc(i)}</option>`
+    ).join("");
+    if (selected && data.industries.includes(selected)) select.value = selected;
+    else if (data.industries.includes("其他")) select.value = "其他";
+  }
+
+  function updateIndustryFilters() {
+    for (const id of ["industry-filter", "industry-filter-all"]) {
+      const el = $(id);
+      const old = el.value;
+      el.innerHTML = '<option value="">所有產業</option>' +
+        data.industries.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join("");
+      if (data.industries.includes(old)) el.value = old;
+    }
+    fillSelect($("d-industry"), $("d-industry").value);
+  }
+
+  function stockRow(s, full = false) {
+    const valued = hasValuation(s);
+    const industry = esc(s.industry || "其他");
+    const company = esc(s.company || "未命名企業");
+    const code = esc(s.code || "未填代號");
+    const action = `<button data-open="${esc(s.id)}">查看研究 ↗</button>`;
+    if (full) {
+      return `<tr>
+        <td><div class="stock-name">${company}</div><div class="stock-code">${code}</div></td>
+        <td>${industry}</td>
+        <td><span class="tag ${valued ? "blue" : ""}">${valued ? "已建立估值" : "尚未估值"}</span></td>
+        <td>${esc(s.updatedAt || "—")}</td>
+        <td>${action}</td>
+      </tr>`;
+    }
+    return `<tr>
+      <td><div class="stock-name">${company}</div><div class="stock-code">${code}</div></td>
+      <td>${industry}</td>
+      <td class="text-right metric">${money(s.price)}</td>
+      <td class="text-right metric">${fmt(s.pe)}</td>
+      <td><span class="tag ${valued ? "blue" : ""}">${valued ? "已建立估值" : "待研究"}</span></td>
+      <td>${action}</td>
+    </tr>`;
+  }
+
+  function renderStockTables() {
+    const q = $("stock-search").value.trim().toLowerCase();
+    const industry = $("industry-filter").value;
+    const vf = $("valuation-filter").value;
+
+    const filtered = data.stocks.filter(s => {
+      const matchesQ = !q || `${s.company} ${s.code}`.toLowerCase().includes(q);
+      const matchesIndustry = !industry || s.industry === industry;
+      const matchesValuation = !vf ||
+        (vf === "valued" ? hasValuation(s) : !hasValuation(s));
+      return matchesQ && matchesIndustry && matchesValuation;
+    });
+
+    $("stock-table-body").innerHTML = filtered.map(s => stockRow(s)).join("");
+    $("stock-empty").classList.toggle("hidden", filtered.length > 0);
+
+    const qAll = $("stock-search-all").value.trim().toLowerCase();
+    const iAll = $("industry-filter-all").value;
+    const all = data.stocks.filter(s =>
+      (!qAll || `${s.company} ${s.code}`.toLowerCase().includes(qAll)) &&
+      (!iAll || s.industry === iAll)
+    );
+    $("stock-table-all").innerHTML = all.map(s => stockRow(s, true)).join("");
+    $("stock-empty-all").classList.toggle("hidden", all.length > 0);
+  }
+
+  function renderStats() {
+    $("stat-count").textContent = data.stocks.length;
+    $("stat-journals").textContent = data.stocks.reduce((n, s) => n + s.journals.length, 0);
+    $("stat-valued").textContent = data.stocks.filter(hasValuation).length;
+    $("data-summary").textContent =
+      `目前有 ${data.stocks.length} 家研究企業、` +
+      `${data.stocks.reduce((n, s) => n + s.journals.length, 0)} 筆研究日誌、` +
+      `${data.industries.length} 個產業分類。`;
+    renderRecentActivity();
+  }
+
+  function allJournalEntries() {
+    return data.stocks.flatMap(s =>
+      s.journals.map(j => ({ ...j, stockId: s.id, company: s.company, code: s.code }))
+    ).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  }
+
+  function renderRecentActivity() {
+    const entries = allJournalEntries().slice(0, 4);
+    $("recent-activity").innerHTML = entries.length ? entries.map(j => `
+      <div class="journal-entry">
+        <div class="journal-date">${esc(j.date)} · ${esc(j.company || "未命名企業")}</div>
+        <div style="margin-top:4px">${esc(j.title || "研究更新")}</div>
+        <div class="muted small">${esc((j.content || "").slice(0, 100))}</div>
+      </div>`).join("") :
+      "新增研究日誌後，最近的紀錄會顯示在這裡。";
+  }
+
+  function renderJournalPage() {
+    const entries = allJournalEntries();
+    $("journal-page-list").innerHTML = entries.map(j => `
+      <div class="journal-entry">
+        <div class="between wrap">
+          <div>
+            <div class="journal-date">${esc(j.date)} · ${esc(j.code || "")}</div>
+            <strong>${esc(j.title || "研究更新")}</strong>
+            <div class="muted small">${esc(j.company || "")}</div>
+          </div>
+          <button data-open="${esc(j.stockId)}">查看企業</button>
+        </div>
+        <p style="white-space:pre-wrap;margin:10px 0 0">${esc(j.content || "")}</p>
+      </div>`).join("");
+    $("journal-page-empty").classList.toggle("hidden", entries.length > 0);
+  }
+
+  function renderIndustries() {
+    updateIndustryFilters();
+    $("industry-manager").innerHTML = data.industries.map((name, idx) => `
+      <div class="between wrap" style="padding:9px 0;border-bottom:1px solid var(--line)">
+        <span>${esc(name)}</span>
+        <div class="row gap">
+          <button data-rename-industry="${idx}">重新命名</button>
+          <button class="danger" data-delete-industry="${idx}">刪除</button>
+        </div>
+      </div>`).join("");
+  }
+
+  function renderAll() {
+    renderIndustries();
+    renderStockTables();
+    renderStats();
+    renderJournalPage();
+    if (currentStockId && findStock(currentStockId)) {
+      $("detail-updated").textContent = "更新於 " + (findStock(currentStockId).updatedAt || "—");
+    }
+  }
+
+  const detailFields = {
+    "d-company": "company", "d-code": "code", "d-industry": "industry",
+    "d-business": "business", "d-price": "price", "d-price-date": "priceDate",
+    "d-eps": "eps", "d-eps-period": "epsPeriod", "d-pe": "pe", "d-pe-date": "peDate",
+    "d-revenue": "revenue", "d-revenue-period": "revenuePeriod",
+    "d-growth": "growth", "d-growth-period": "growthPeriod",
+    "d-dividend": "dividend", "d-dividend-period": "dividendPeriod",
+    "d-yield": "yield", "d-yield-date": "yieldDate",
+    "d-thesis": "thesis", "d-risks": "risks", "d-notes": "notes",
+    "d-valuation-notes": "valuationNotes"
+  };
+
+  function fillDetail(s) {
+    $("detail-name").textContent = s.company || "未命名企業";
+    $("detail-code-label").textContent = `${s.code || "未填代號"} / EQUITY RESEARCH`;
+    $("detail-description").textContent = s.description || "建立企業資料與你的研究觀點。";
+    $("detail-industry").textContent = s.industry || "未分類";
+    $("detail-updated").textContent = "更新於 " + (s.updatedAt || "—");
+
+    fillSelect($("d-industry"), s.industry);
+    Object.entries(detailFields).forEach(([id, key]) => {
+      const el = $(id);
+      if (!el) return;
+      el.value = s[key] ?? "";
+    });
+
+    for (const key of ["low", "base", "high"]) {
+      $(`v-eps-${key}`).value = s.valuation[key].eps ?? "";
+      $(`v-pe-${key}`).value = s.valuation[key].pe ?? "";
+    }
+    renderValuation();
+    renderDetailJournals(s);
+  }
+
+  function saveDetailFields() {
+    const s = findStock(currentStockId);
+    if (!s) return;
+    Object.entries(detailFields).forEach(([id, key]) => {
+      const el = $(id);
+      s[key] = ["price", "eps", "pe", "revenue", "growth", "dividend", "yield"].includes(key)
+        ? numberOrNull(el.value) : el.value.trim();
+    });
+    for (const key of ["low", "base", "high"]) {
+      s.valuation[key].eps = numberOrNull($(`v-eps-${key}`).value);
+      s.valuation[key].pe = numberOrNull($(`v-pe-${key}`).value);
+    }
+    s.updatedAt = today();
+    return s;
+  }
+
+  function renderValuation() {
+    const s = findStock(currentStockId);
+    if (!s) return;
+    const price = numberOrNull($("d-price").value);
+    const scenarios = ["low", "base", "high"];
+
+    for (const key of scenarios) {
+      const eps = numberOrNull($(`v-eps-${key}`).value);
+      const pe = numberOrNull($(`v-pe-${key}`).value);
+      const fair = eps !== null && pe !== null ? eps * pe : null;
+      const ret = fair !== null && price !== null && price > 0 ? fair / price - 1 : null;
+      $(`v-price-${key}`).textContent = fair === null ? "—" : money(fair);
+      $(`v-return-${key}`).textContent = pct(ret);
+      $(`v-return-${key}`).className = "metric " +
+        (ret === null ? "" : ret >= 0 ? "positive" : "negative");
+    }
+
+    const baseFair = numberOrNull($("v-eps-base").value) !== null &&
+      numberOrNull($("v-pe-base").value) !== null
+      ? Number($("v-eps-base").value) * Number($("v-pe-base").value) : null;
+
+    const gap = baseFair !== null && price !== null ? baseFair - price : null;
+    const premium = baseFair !== null && baseFair > 0 && price !== null
+      ? price / baseFair - 1 : null;
+
+    $("v-gap-base").textContent = gap === null ? "—" : money(gap);
+    $("v-gap-base").className = "scenario-value metric " +
+      (gap === null ? "" : gap >= 0 ? "positive" : "negative");
+    $("v-premium-base").textContent = pct(premium);
+    $("v-premium-base").className = "scenario-value metric " +
+      (premium === null ? "" : premium <= 0 ? "positive" : "negative");
+  }
+
+  function openStockModal(id = null) {
+    editingStockId = id;
+    const s = id ? findStock(id) : blankStock();
+    if (!s) return;
+    const industries = data.industries.map(i =>
+      `<option value="${esc(i)}" ${i === s.industry ? "selected" : ""}>${esc(i)}</option>`
+    ).join("");
+
+    $("modal-root").innerHTML = `
+      <div class="modal-backdrop" id="stock-modal-backdrop">
+        <div class="glass modal" role="dialog" aria-modal="true" aria-labelledby="stock-modal-title">
+          <div class="between">
+            <div>
+              <div class="eyebrow">EQUITY PROFILE</div>
+              <h2 id="stock-modal-title">${id ? "編輯企業資料" : "新增研究標的"}</h2>
+            </div>
+            <button id="close-stock-modal" aria-label="關閉">✕</button>
+          </div>
+          <div class="grid form-grid">
+            <div class="field"><label for="m-company">公司名稱 *</label><input id="m-company" value="${esc(s.company)}" placeholder="例如：台積電" required></div>
+            <div class="field"><label for="m-code">股票代號</label><input id="m-code" value="${esc(s.code)}" placeholder="例如：2330"></div>
+            <div class="field"><label for="m-industry">產業分類</label><select id="m-industry">${industries}</select></div>
+            <div class="field"><label for="m-description">簡短描述</label><input id="m-description" value="${esc(s.description)}" placeholder="企業主要業務"></div>
+          </div>
+          <div class="form-actions">
+            <button id="cancel-stock-modal">取消</button>
+            <button class="primary" id="confirm-stock-modal">${id ? "儲存變更" : "建立研究檔案"}</button>
+          </div>
+        </div>
+      </div>`;
+
+    $("close-stock-modal").onclick = closeModal;
+    $("cancel-stock-modal").onclick = closeModal;
+    $("stock-modal-backdrop").addEventListener("click", e => {
+      if (e.target.id === "stock-modal-backdrop") closeModal();
+    });
+    $("confirm-stock-modal").onclick = () => {
+      const company = $("m-company").value.trim();
+      if (!company) {
+        showToast("請先輸入公司名稱");
+        $("m-company").focus();
+        return;
+      }
+      const code = $("m-code").value.trim();
+      const duplicate = data.stocks.find(x =>
+        x.id !== editingStockId && code && x.code.toLowerCase() === code.toLowerCase()
+      );
+      if (duplicate && !confirm(`代號 ${code} 已存在（${duplicate.company}），仍要建立嗎？`)) return;
+
+      if (editingStockId) {
+        Object.assign(s, {
+          company, code, industry: $("m-industry").value,
+          description: $("m-description").value.trim(),
+          updatedAt: today()
+        });
+        showToast("企業資料已更新");
+      } else {
+        const fresh = blankStock();
+        Object.assign(fresh, {
+          company, code, industry: $("m-industry").value,
+          description: $("m-description").value.trim()
+        });
+        data.stocks.unshift(fresh);
+        currentStockId = fresh.id;
+        closeModal();
+        persist("已新增研究標的");
+        openResearch(fresh.id);
+        return;
+      }
+      closeModal();
+      persist("企業資料已更新");
+      if (currentStockId === s.id) fillDetail(s);
+    };
+    $("m-company").focus();
+  }
+
+  function closeModal() {
+    $("modal-root").innerHTML = "";
+    editingStockId = null;
+  }
+
+  function deleteStock(id) {
+    const s = findStock(id);
+    if (!s) return;
+    if (!confirm(`確定刪除「${s.company}（${s.code || "無代號"}）」及其所有研究日誌？此操作無法復原。`)) return;
+    data.stocks = data.stocks.filter(x => x.id !== id);
+    if (currentStockId === id) currentStockId = null;
+    persist("股票與相關日誌已刪除");
+    setPage("stocks");
+  }
+
+  function addJournal(id = currentStockId) {
+    const s = findStock(id);
+    if (!s) return;
+    $("modal-root").innerHTML = `
+      <div class="modal-backdrop" id="journal-modal-backdrop">
+        <div class="glass modal" role="dialog" aria-modal="true" aria-labelledby="journal-modal-title">
+          <div class="between">
+            <div><div class="eyebrow">RESEARCH JOURNAL</div><h2 id="journal-modal-title">新增研究紀錄</h2></div>
+            <button id="close-journal-modal" aria-label="關閉">✕</button>
+          </div>
+          <div class="field" style="margin-bottom:14px"><label for="j-date">日期</label><input id="j-date" type="date" value="${today()}"></div>
+          <div class="field" style="margin-bottom:14px"><label for="j-title">紀錄標題 *</label><input id="j-title" placeholder="例如：Q2 財報觀察、產業趨勢更新"></div>
+          <div class="field"><label for="j-content">研究內容 *</label><textarea id="j-content" placeholder="今天發現了什麼？這如何影響原本的投資論點？"></textarea></div>
+          <div class="form-actions"><button id="cancel-journal-modal">取消</button><button class="primary" id="confirm-journal-modal">儲存紀錄</button></div>
+        </div>
+      </div>`;
+    const close = closeModal;
+    $("close-journal-modal").onclick = close;
+    $("cancel-journal-modal").onclick = close;
+    $("journal-modal-backdrop").addEventListener("click", e => {
+      if (e.target.id === "journal-modal-backdrop") close();
+    });
+    $("confirm-journal-modal").onclick = () => {
+      const title = $("j-title").value.trim();
+      const content = $("j-content").value.trim();
+      if (!title || !content) {
+        showToast("請填寫標題與研究內容");
+        return;
+      }
+      s.journals.unshift({
+        id: uid(), date: $("j-date").value || today(), title, content
+      });
+      s.updatedAt = today();
+      close();
+      persist("研究日誌已儲存");
+      if (currentStockId === id) renderDetailJournals(s);
+    };
+    $("j-title").focus();
+  }
+
+  function renderDetailJournals(s) {
+    $("detail-journal-list").innerHTML = s.journals.map(j => `
+      <div class="journal-entry">
+        <div class="between wrap">
+          <div class="journal-date">${esc(j.date)}</div>
+          <button class="danger" data-delete-journal="${esc(j.id)}">刪除</button>
+        </div>
+        <strong>${esc(j.title)}</strong>
+        <p style="white-space:pre-wrap;margin:8px 0 0">${esc(j.content)}</p>
+      </div>`).join("");
+    $("detail-journal-empty").classList.toggle("hidden", s.journals.length > 0);
+  }
+
+  function exportJSON() {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `StockLab-backup-${today()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast("JSON 備份已匯出");
+  }
+
+  function importJSON(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!parsed || !Array.isArray(parsed.stocks) || !Array.isArray(parsed.industries)) {
+          throw new Error("備份格式不正確");
+        }
+        if (!confirm(`將匯入 ${parsed.stocks.length} 家企業與 ${parsed.industries.length} 個分類，並取代目前資料。建議先匯出備份。確定繼續？`)) return;
+        const cleanIndustries = [...new Set([
+          ...DEFAULT_INDUSTRIES,
+          ...parsed.industries.filter(x => typeof x === "string" && x.trim()).map(x => x.trim())
+        ])];
+        const cleanStocks = parsed.stocks.map(s => ({
+          ...blankStock(), ...s,
+          id: typeof s.id === "string" ? s.id : uid(),
+          valuation: {
+            low: { eps: null, pe: null, ...(s.valuation?.low || {}) },
+            base: { eps: null, pe: null, ...(s.valuation?.base || {}) },
+            high: { eps: null, pe: null, ...(s.valuation?.high || {}) }
+          },
+          journals: Array.isArray(s.journals) ? s.journals : []
+        }));
+        data = { version: 1, industries: cleanIndustries, stocks: cleanStocks };
+        currentStockId = null;
+        closeModal();
+        persist("備份匯入成功");
+        setPage("dashboard");
+      } catch (error) {
+        console.error(error);
+        showToast("匯入失敗：請確認這是有效的 StockLab JSON 備份");
+      } finally {
+        $("import-file").value = "";
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function addIndustry() {
+    const input = $("new-industry");
+    const name = input.value.trim();
+    if (!name) return showToast("請輸入產業名稱");
+    if (data.industries.includes(name)) return showToast("這個分類已經存在");
+    data.industries.push(name);
+    input.value = "";
+    persist("產業分類已新增");
+  }
+
+  function renameIndustry(index) {
+    const oldName = data.industries[index];
+    if (!oldName) return;
+    const newName = prompt("請輸入新的產業名稱：", oldName);
+    if (newName === null) return;
+    const name = newName.trim();
+    if (!name) return showToast("分類名稱不可空白");
+    if (name !== oldName && data.industries.includes(name)) return showToast("這個分類已存在");
+    data.industries[index] = name;
+    data.stocks.forEach(s => {
+      if (s.industry === oldName) s.industry = name;
+    });
+    persist("產業分類已重新命名");
+  }
+
+  function deleteIndustry(index) {
+    const name = data.industries[index];
+    if (!name) return;
+    if (DEFAULT_INDUSTRIES.includes(name)) {
+      return showToast("內建分類不能刪除，但可以重新命名自訂分類");
+    }
+    if (!confirm(`刪除「${name}」分類？該分類下的股票會改為「其他」。`)) return;
+    data.industries.splice(index, 1);
+    data.stocks.forEach(s => {
+      if (s.industry === name) s.industry = "其他";
+    });
+    persist("產業分類已刪除");
+  }
+
+  // 首頁轉場
+  $("enter-lab").addEventListener("click", () => {
+    $("bar-home").classList.add("leaving");
+    $("app").classList.add("ready");
+    setTimeout(() => {
+      $("bar-home").classList.add("hidden");
+      setPage("dashboard");
+    }, 850);
+  });
+
+  // 導覽列
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.addEventListener("click", () => setPage(btn.dataset.page));
+  });
+
+  // 新增股票入口
+  ["add-stock-top", "add-stock-main", "add-stock-list"].forEach(id => {
+    $(id).addEventListener("click", () => openStockModal());
+  });
+
+  $("stock-search").addEventListener("input", renderStockTables);
+  $("industry-filter").addEventListener("change", renderStockTables);
+  $("valuation-filter").addEventListener("change", renderStockTables);
+  $("stock-search-all").addEventListener("input", renderStockTables);
+  $("industry-filter-all").addEventListener("change", renderStockTables);
+
+  $("back-to-stocks").addEventListener("click", () => setPage("stocks"));
+  $("edit-current-stock").addEventListener("click", () => openStockModal(currentStockId));
+  $("save-current-stock").addEventListener("click", () => {
+    if (!currentStockId) return;
+    const s = saveDetailFields();
+    persist("研究資料已儲存");
+    fillDetail(s);
+  });
+
+  for (const id of [
+    "d-price", "v-eps-low", "v-pe-low", "v-eps-base",
+    "v-pe-base", "v-eps-high", "v-pe-high"
+  ]) {
+    $(id).addEventListener("input", renderValuation);
+  }
+
+  $("add-journal-entry").addEventListener("click", () => {
+    if (currentStockId) addJournal(currentStockId);
+  });
+
+  $("quick-export").addEventListener("click", exportJSON);
+  $("export-json").addEventListener("click", exportJSON);
+  $("import-json").addEventListener("click", () => $("import-file").click());
+  $("import-file").addEventListener("change", e => importJSON(e.target.files[0]));
+  $("add-industry").addEventListener("click", addIndustry);
+  $("new-industry").addEventListener("keydown", e => {
+    if (e.key === "Enter") addIndustry();
+  });
+
+  // 表格與分類按鈕使用事件委派
+  document.addEventListener("click", e => {
+    const open = e.target.closest("[data-open]");
+    if (open) {
+      openResearch(open.dataset.open);
+      return;
+    }
+    const delJournal = e.target.closest("[data-delete-journal]");
+    if (delJournal) {
+      const s = findStock(currentStockId);
+      if (!s) return;
+      if (!confirm("確定刪除這筆研究紀錄？")) return;
+      s.journals = s.journals.filter(j => j.id !== delJournal.dataset.deleteJournal);
+      s.updatedAt = today();
+      persist("研究紀錄已刪除");
+      renderDetailJournals(s);
+      return;
+    }
+    const rename = e.target.closest("[data-rename-industry]");
+    if (rename) {
+      renameIndustry(Number(rename.dataset.renameIndustry));
+      return;
+    }
+    const delIndustry = e.target.closest("[data-delete-industry]");
+    if (delIndustry) {
+      deleteIndustry(Number(delIndustry.dataset.deleteIndustry));
+    }
+  });
+
+  // 支援鍵盤關閉彈窗S
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && $("modal-root").innerHTML) closeModal();
+  });
+
+  // 初始化
+  renderAll();
+})();
+</script>
+</body>
+</html>
